@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Application</title>
+    <style>
+       body {
+            margin: 20px;
+            background: radial-gradient(circle, rgba(238,174,219,1) 0%, rgba(148,233,221,1) 100%);
+            font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+        }
+
+        #main-container{
+            max-width: 600px;
+            margin: auto;
+            border: 2px solid rgb(230, 222, 213);
+            padding: 30px 50px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(136, 48, 48, 0.1);
+            height: 550px;
+        }
+        
+        .header {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 3px 15px;
+            border-bottom: 0.1em solid #97FEED;
+            border: 1px solid rgb(176, 176, 167);
+            box-shadow: 0 0 10px  rgba(172, 110, 110, 0.1)
+
+            
+            }
+        .header h1{
+            background-color: rgb(132, 174, 211);
+            align-items: center;
+            padding: 10px 70px 6px 5px;
+            margin-top: 3px;
+            display: block;
+            border-radius: 5px;
+            font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+            color: rgb(83, 107, 108);
+            
+        }
+        
+        #timer{
+            align-items: left;
+            background-color: rgb(132, 174, 211);
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            color: rgb(58, 99, 100);
+            font-size: large;
+            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-weight: bold;
+        }
+
+        #quiz-container{
+            max-width: 600px;
+            margin: 0;
+            border: 2px solid rgb(198, 195, 190);
+            padding: 30px 50px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(136, 48, 48, 0.1);
+            height: 350px;
+        }
+        #question-container{
+            background-color:  rgb(132, 174, 211);
+            align-items: center;
+            border-radius: 4px;
+            width: 100%;
+            margin: 5px ;
+            padding: 20px;
+            font-size: larger;
+            
+
+        }
+        button{
+            text-align: center;
+            background-color: rgb(223, 203, 177);
+            width: 100%;
+            border-radius: 5px;
+            margin: 10px 5px 4px;
+            padding: 10px;
+            font-size: larger;
+            border: none;
+            box-shadow: 0 0 10px rgba(136, 48, 48, 0.1);  
+        }
+        button:hover{
+            background-color: burlywood;
+            border: 2px solid rgb(160, 193, 194);
+        }
+
+        #feedback{
+            color: rgb(65, 117, 117);
+            text-align: center;
+            margin-top: 15px;
+            font-size: larger;
+        }
+
+
+    
+    </style>
+</head>
+<body>
+    <div id="main-container">
+        <div class="header">
+            <h1>All About Web</h1>
+            <div id="timer">
+                <img src="timer.png" width="20px">
+                <span>20s</span>
+            </div>
+        </div>
+        <div id="quiz-container">
+            <div id="question-container" class="question"></div>
+            <div id="options-container" class="options"></div>
+            <div id="feedback"></div>
+        </div>
+        
+        <button id="next-btn">Next</button>
+        <button id="restart-btn" style="display: none;">Restart</button>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "What is the purpose of writing a comments in Programming?",
+                options: ["It explains the code and helps to edit the source code at a later date", 
+                                "It is used to discover more about Programming", 
+                                "To have a better understanding of the written codes", 
+                                " None of the above"],
+                correctAnswer: "It explains the code and helps to edit the source code at a later date"
+            },
+            {
+                question: "Why do we use CSS?",
+                options: ["Structure", "Design/Style", "Behavior", "None of the Above"],
+                correctAnswer: "Design/Style"
+            },
+            {
+                question: "Which of these is NOT an HTML Element?",
+                options: ["By start tag", "By end tag", "By element content", "By statement"],
+                correctAnswer: "By statement"
+                },
+
+                {
+                question: "It is used to store elements of different types",
+                options: ["functions", "objects", "arrays", "subjects"],
+                correctAnswer: "arrays"
+                },
+
+                {
+                question: "Where does the best practice to put Javascript element?",
+                options: ["<style>", "<body>", "<head>", "another file"],
+                correctAnswer: "<body>"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timer;
+
+        const questionContainer = document.getElementById("question-container");
+        const optionsContainer = document.getElementById("options-container");
+        const timerContainer = document.getElementById("timer");
+        const feedbackContainer = document.getElementById("feedback");
+        const nextButton = document.getElementById("next-btn");
+        const restartButton = document.getElementById("restart-btn");
+
+        function startQuiz() {
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const currentQuestion = questions[currentQuestionIndex];
+            questionContainer.textContent = currentQuestion.question;
+            optionsContainer.innerHTML = "";
+            feedbackContainer.innerHTML = "";
+
+            currentQuestion.options.forEach((option, index) => {
+                const button = document.createElement("button");
+                button.textContent = option;
+                button.addEventListener("click", () => checkAnswer(index));
+                optionsContainer.appendChild(button);
+            });
+
+            // This is to display and set the timer for 20s
+            let timeLeft = 20;
+            updateTimerDisplay(timeLeft);
+            timer = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay(timeLeft);
+
+                if (timeLeft === 0) {
+                    clearInterval(timer);
+                    currentQuestionIndex++;
+                    if (currentQuestionIndex < questions.length) {
+                        showQuestion();
+                    } else {
+                        showScore();
+                    }
+                }
+            }, 1000);
+
+            nextButton.style.display = "none";
+            restartButton.style.display = "none";
+        }
+
+        function checkAnswer(selectedIndex) {
+            clearInterval(timer);
+
+            const currentQuestion = questions[currentQuestionIndex];
+            const selectedOption = currentQuestion.options[selectedIndex];
+
+            if (selectedOption === currentQuestion.correctAnswer) {
+                score++;
+                feedbackContainer.textContent = "Correct!";
+            } else {
+                feedbackContainer.textContent = `Incorrect! The correct answer is: ${currentQuestion.correctAnswer}`;
+            }
+
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex < questions.length) {
+                nextButton.style.display = "block";
+            } else {
+                showScore();
+            }
+        }
+
+        function showScore() {
+            clearInterval(timer);
+
+            questionContainer.textContent = `Your Score: ${score} out of ${questions.length}`;
+            optionsContainer.innerHTML = "";
+            feedbackContainer.innerHTML = "";
+            nextButton.style.display = "none";
+            restartButton.style.display = "block";
+            timerContainer.innerHTML = "";
+        }
+
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            startQuiz();
+        }
+
+        function updateTimerDisplay(timeLeft) {
+            timerContainer.innerHTML = `Time Left: ${timeLeft}s`;
+        }
+
+        nextButton.addEventListener("click", showQuestion);
+        restartButton.addEventListener("click", restartQuiz);
+
+        startQuiz();
+    </script>
+</body>
+</html>
